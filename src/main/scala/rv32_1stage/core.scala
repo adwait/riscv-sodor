@@ -67,6 +67,8 @@ class Core(implicit val p: Parameters, val conf: SodorCoreParams) extends Abstra
 
   io.sigIO.lft_tile_regfile <> d.io.sigIO.lft_tile_regfile
 
+  dontTouch(io.sigIO.lft_tile_regfile)
+
   val mem_ports = List(io.dmem, io.imem)
   val interrupt = io.interrupt
   val hartid = io.hartid
