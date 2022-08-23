@@ -169,7 +169,7 @@ class MemoryModule(numBytes: Int, useAsync: Boolean) {
 // what the fesvr expects the smallest memory size to be.  A proper fix would
 // be to modify the fesvr to expect smaller sizes.
 //for 1,2 and 5 stage need for combinational reads
-class ScratchPadMemoryBase(num_core_ports: Int, num_bytes: Int = (1 << 21), useAsync: Boolean = true)(implicit val conf: SodorCoreParams) extends Module
+class ScratchPadMemoryBase(num_core_ports: Int, num_bytes: Int = (1 << 10), useAsync: Boolean = true)(implicit val conf: SodorCoreParams) extends Module
 {
    val io = IO(new Bundle
    {
@@ -212,8 +212,8 @@ class ScratchPadMemoryBase(num_core_ports: Int, num_bytes: Int = (1 << 21), useA
    async_data.write(debug_port_req.addr, debug_port_req.data, debug_port_req.getTLSize, debug_port_wen)
 }
 
-class AsyncScratchPadMemory(num_core_ports: Int, num_bytes: Int = (1 << 21))(implicit conf: SodorCoreParams) 
+class AsyncScratchPadMemory(num_core_ports: Int, num_bytes: Int = (1 << 10))(implicit conf: SodorCoreParams) 
    extends ScratchPadMemoryBase(num_core_ports, num_bytes, true)(conf)
 
-class SyncScratchPadMemory(num_core_ports: Int, num_bytes: Int = (1 << 21))(implicit conf: SodorCoreParams) 
+class SyncScratchPadMemory(num_core_ports: Int, num_bytes: Int = (1 << 10))(implicit conf: SodorCoreParams) 
    extends ScratchPadMemoryBase(num_core_ports, num_bytes, false)(conf)

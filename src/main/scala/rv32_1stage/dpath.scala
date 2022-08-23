@@ -17,6 +17,10 @@ import freechips.rocketchip.tile.CoreInterrupts
 import Constants._
 import sodor.common._
 
+class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+  val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+}
+
 class DatToCtlIo(implicit val conf: SodorCoreParams) extends Bundle()
 {
    val inst   = Output(UInt(32.W))
@@ -40,6 +44,8 @@ class DpathIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bun
    val interrupt = Input(new CoreInterrupts())
    val hartid = Input(UInt())
    val reset_vector = Input(UInt())
+
+   val sigIO = new DatAbstractSignalIO
 }
 
 class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Module
@@ -123,6 +129,8 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    {
       regfile(wb_addr) := wb_data
    }
+
+   io.sigIO.lft_tile_regfile := Cat(regfile(31) , regfile(30) , regfile(29) , regfile(28) , regfile(27) , regfile(26) , regfile(25) , regfile(24) , regfile(23) , regfile(22) , regfile(21) , regfile(20) , regfile(19) , regfile(18) , regfile(17) , regfile(16) , regfile(15) , regfile(14) , regfile(13) , regfile(12) , regfile(11) , regfile(10) , regfile(9) , regfile(8) , regfile(7) , regfile(6) , regfile(5) , regfile(4) , regfile(3) , regfile(2) , regfile(1) , regfile(0))
 
    //// DebugModule
    io.ddpath.rdata := regfile(io.ddpath.addr)

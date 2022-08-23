@@ -19,6 +19,10 @@ import freechips.rocketchip.tile.CoreInterrupts
 import Constants._
 import sodor.common._
 
+class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+  val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+}
+
 class DatToCtlIo(implicit val conf: SodorCoreParams) extends Bundle()
 {
    val dec_inst    = Output(UInt(conf.xprlen.W))
@@ -47,6 +51,8 @@ class DpathIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bun
    val interrupt = Input(new CoreInterrupts())
    val hartid = Input(UInt())
    val reset_vector = Input(UInt())
+
+   val sigIO = new DatAbstractSignalIO
 }
 
 class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Module
@@ -76,12 +82,12 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    val exe_reg_valid         = RegInit(false.B)
    val exe_reg_inst          = RegInit(BUBBLE)
    val exe_reg_pc            = RegInit(0.asUInt(conf.xprlen.W))
-   val exe_reg_wbaddr        = Reg(UInt(5.W))
-   val exe_reg_rs1_addr      = Reg(UInt(5.W))
-   val exe_reg_rs2_addr      = Reg(UInt(5.W))
-   val exe_reg_op1_data      = Reg(UInt(conf.xprlen.W))
-   val exe_reg_op2_data      = Reg(UInt(conf.xprlen.W))
-   val exe_reg_rs2_data      = Reg(UInt(conf.xprlen.W))
+   val exe_reg_wbaddr        = RegInit(0.asUInt(5.W))
+   val exe_reg_rs1_addr      = RegInit(0.asUInt(5.W))
+   val exe_reg_rs2_addr      = RegInit(0.asUInt(5.W))
+   val exe_reg_op1_data      = RegInit(0.asUInt(conf.xprlen.W))
+   val exe_reg_op2_data      = RegInit(0.asUInt(conf.xprlen.W))
+   val exe_reg_rs2_data      = RegInit(0.asUInt(conf.xprlen.W))
    val exe_reg_ctrl_br_type  = RegInit(BR_N)
    val exe_reg_ctrl_op2_sel  = Reg(UInt())
    val exe_reg_ctrl_alu_fun  = Reg(UInt())
@@ -228,6 +234,8 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    regfile.io.dm_en := io.ddpath.validreq
    regfile.io.dm_wdata := io.ddpath.wdata
    ///
+
+   io.sigIO.lft_tile_regfile := regfile.io.sigIO.lft_tile_regfile 
 
    // immediates
    val imm_itype  = dec_reg_inst(31,20)
