@@ -19,6 +19,17 @@ import freechips.rocketchip.tile.CoreInterrupts
 import Constants._
 import sodor.common._
 
+
+/**
+ * LoadBuffer for the core
+ */
+class LBEntry(implicit val conf: SodorCoreParams) extends Bundle
+{
+  val valid       = Bool()                   // is this entry valid?
+  val addr        = UInt((conf.xprlen).W)    // what address does this data come from?
+  val data        = UInt((conf.xprlen).W)    // what data does this hold
+}
+
 class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
   val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
 }
@@ -39,6 +50,8 @@ class DatToCtlIo(implicit val conf: SodorCoreParams) extends Bundle()
 
    val csr_eret = Output(Bool())
    val csr_interrupt = Output(Bool())
+
+   val lb_valid = Output(Bool())
 }
 
 class DpathIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bundle
@@ -234,6 +247,28 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    regfile.io.dm_en := io.ddpath.validreq
    regfile.io.dm_wdata := io.ddpath.wdata
    ///
+
+   // // Shadow register file
+   // val shadow_regfile = Module(new RegisterFile())
+   // shadow_regfile.io.rs1_addr := shadow_dec_rs1_addr
+   // shadow_regfile.io.rs2_addr := shadow_dec_rs2_addr
+   // val shadow_rf_rs1_data = shadow_regfile.io.rs1_data
+   // val shadow_rf_rs2_data = shadow_regfile.io.rs2_data
+   // shadow_regfile.io.waddr := shadow_wb_reg_wbaddr
+   // shadow_regfile.io.wdata := shadow_wb_reg_wbdata
+   // shadow_regfile.io.wen   := shadow_wb_reg_ctrl_rf_wen
+   // val num_lb_ents   = 1
+   // val lb_table      = Reg(Vec(num_lb_ents, new LBEntry()))
+   val lb_table      = RegInit(0.U.asTypeOf(new LBEntry()))
+   // val lb_match      = Wire(Vec(num_lb_ents), Bool())
+   // val lb_match      = Wire(Bool())
+   val lb_ld_addr    = Wire(UInt(32.W))
+   // for (i <- 0 until num_lb_ents) {
+   //    lb_match(i) := (lb_ld_addr === lb_table(i).addr) && (lb_table(i).valid)
+   // }
+   // val lb_match_any  = lb_match.orR
+   val lb_match_any  = (lb_ld_addr === lb_table.addr) && (lb_table.valid)
+   io.dat.lb_valid   := lb_match_any
 
    io.sigIO.lft_tile_regfile := regfile.io.sigIO.lft_tile_regfile 
 
@@ -480,7 +515,7 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    mem_wbdata := MuxCase(mem_reg_alu_out, Array(
                   (mem_reg_ctrl_wb_sel === WB_ALU) -> mem_reg_alu_out,
                   (mem_reg_ctrl_wb_sel === WB_PC4) -> mem_reg_alu_out,
-                  (mem_reg_ctrl_wb_sel === WB_MEM) -> io.dmem.resp.bits.data,
+                  (mem_reg_ctrl_wb_sel === WB_MEM) -> Mux(lb_match_any, lb_table.data, io.dmem.resp.bits.data),
                   (mem_reg_ctrl_wb_sel === WB_CSR) -> csr.io.rw.rdata
                   ))
 
@@ -522,6 +557,26 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    io.dmem.req.bits.fcn  := mem_reg_ctrl_mem_fcn
    io.dmem.req.bits.typ  := mem_reg_ctrl_mem_typ
    io.dmem.req.bits.data := mem_reg_rs2_data
+
+   // Also supply the same to the load buffer
+   lb_ld_addr  := mem_reg_alu_out.asUInt()
+
+   when (!io.ctl.full_stall)
+   {
+      when (mem_reg_ctrl_mem_fcn === M_XWR) {
+         lb_table.valid := false.B
+      } .elsewhen (mem_reg_valid && !io.ctl.mem_exception && !interrupt_edge) {
+         when ((mem_reg_ctrl_mem_fcn === M_XRD) && (mem_reg_ctrl_wb_sel === WB_MEM)) {
+            lb_table.valid := true.B
+            lb_table.addr  := lb_ld_addr
+            lb_table.data  := mem_wbdata
+         }
+      }
+   } .otherwise {
+      when (mem_reg_ctrl_mem_fcn === M_XWR) {
+         lb_table.valid := false.B
+      }
+   }
 
    val wb_reg_inst = RegNext(mem_reg_inst)
 
