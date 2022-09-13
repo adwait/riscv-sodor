@@ -31,7 +31,29 @@ class LBEntry(implicit val conf: SodorCoreParams) extends Bundle
 }
 
 class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
-  val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+   val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+   
+   val lft_tile_regfile_io_rs1_addr = Output(UInt(5.W))
+   val lft_tile_regfile_io_rs2_addr = Output(UInt(5.W))
+   val lft_tile_regfile_io_rs1_data = Output(UInt(conf.xprlen.W))
+   val lft_tile_regfile_io_rs2_data = Output(UInt(conf.xprlen.W))
+   
+   val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
+   val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
+   val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
+   val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
+
+   val lft_tile_dec_reg_inst = Output(UInt(32.W))
+   val lft_tile_exe_reg_inst = Output(UInt(32.W))
+   val lft_tile_mem_reg_inst = Output(UInt(32.W))
+   val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
+
+   val lft_tile_if_reg_pc = Output(UInt(32.W))
+   val lft_tile_dec_reg_pc = Output(UInt(32.W))
+   val lft_tile_exe_reg_pc = Output(UInt(32.W))
+   val lft_tile_mem_reg_pc = Output(UInt(32.W))
+
+   val lft_tile_lb_table = Output(new LBEntry())
 }
 
 class DatToCtlIo(implicit val conf: SodorCoreParams) extends Bundle()
@@ -269,8 +291,6 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    // val lb_match_any  = lb_match.orR
    val lb_match_any  = (lb_ld_addr === lb_table.addr) && (lb_table.valid)
    io.dat.lb_valid   := lb_match_any
-
-   io.sigIO.lft_tile_regfile := regfile.io.sigIO.lft_tile_regfile 
 
    // immediates
    val imm_itype  = dec_reg_inst(31,20)
@@ -537,6 +557,29 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
    }
 
 
+
+   // Expose all signals to the top level so that they can be verified/probed
+   io.sigIO.lft_tile_regfile := regfile.io.sigIO.lft_tile_regfile 
+
+   io.sigIO.lft_tile_exe_alu_out := exe_alu_out
+   io.sigIO.lft_tile_imm_itype_sext := imm_itype_sext
+   io.sigIO.lft_tile_regfile_io_rs1_addr := dec_rs1_addr
+   io.sigIO.lft_tile_regfile_io_rs2_addr := dec_rs2_addr
+   io.sigIO.lft_tile_regfile_io_rs1_data := regfile.io.rs1_data
+   io.sigIO.lft_tile_regfile_io_rs2_data := regfile.io.rs2_data
+   io.sigIO.lft_tile_wb_reg_wbdata := wb_reg_wbdata
+   io.sigIO.lft_tile_wb_reg_wbaddr := wb_reg_wbaddr
+   
+   io.sigIO.lft_tile_dec_reg_inst := dec_reg_inst
+   io.sigIO.lft_tile_exe_reg_inst := exe_reg_inst
+   io.sigIO.lft_tile_mem_reg_inst := mem_reg_inst
+   io.sigIO.lft_tile_mem_reg_alu_out := mem_reg_alu_out
+   io.sigIO.lft_tile_if_reg_pc := if_reg_pc
+   io.sigIO.lft_tile_dec_reg_pc := dec_reg_pc
+   io.sigIO.lft_tile_exe_reg_pc := exe_reg_pc
+   io.sigIO.lft_tile_mem_reg_pc := mem_reg_pc
+
+   io.sigIO.lft_tile_lb_table := lb_table
 
    //**********************************
    // External Signals
