@@ -19,6 +19,10 @@ import Constants._
 import sodor.common._
 import sodor.common.Instructions._
 
+class CtlAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+   val lft_tile_alu_fun = Output(UInt(4.W))
+}
+
 class CtlToDatIo extends Bundle()
 {
    val dec_stall  = Output(Bool())    // stall IF/DEC stages (due to hazards)
@@ -52,6 +56,8 @@ class CpathIo(implicit val conf: SodorCoreParams) extends Bundle()
    val dmem = new MemPortIo(conf.xprlen)
    val dat  = Flipped(new DatToCtlIo())
    val ctl  = new CtlToDatIo()
+
+   val sigIO = new CtlAbstractSignalIO
 }
 
 
@@ -283,4 +289,5 @@ class CtlPath(implicit val conf: SodorCoreParams) extends Module
    io.ctl.mem_fcn    := cs_mem_fcn
    io.ctl.mem_typ    := cs_msk_sel
 
+   io.sigIO.lft_tile_alu_fun  := cs_alu_fun
 }

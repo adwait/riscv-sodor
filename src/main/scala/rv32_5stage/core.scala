@@ -20,16 +20,23 @@ class CoreAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
    val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
    val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
    val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
+   val lft_tile_imm_sbtype_sext = Output(UInt(conf.xprlen.W))
    val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
 
+   val lft_tile_dec_wbaddr = Output(UInt(5.W))
+   val lft_tile_exe_reg_wbaddr = Output(UInt(5.W))
+   val lft_tile_mem_reg_wbaddr = Output(UInt(5.W))
+   val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
+   
    val lft_tile_dec_reg_inst = Output(UInt(32.W))
    val lft_tile_exe_reg_inst = Output(UInt(32.W))
    val lft_tile_mem_reg_inst = Output(UInt(32.W))
-   val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
    val lft_tile_if_reg_pc = Output(UInt(32.W))
    val lft_tile_dec_reg_pc = Output(UInt(32.W))
    val lft_tile_exe_reg_pc = Output(UInt(32.W))
    val lft_tile_mem_reg_pc = Output(UInt(32.W))
+
+   val lft_tile_alu_fun = Output(UInt(4.W))
 
    val lft_tile_lb_table = Output(new LBEntry())
 }
@@ -72,12 +79,17 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    io.sigIO.lft_tile_regfile <> d.io.sigIO.lft_tile_regfile
    io.sigIO.lft_tile_exe_alu_out <> d.io.sigIO.lft_tile_exe_alu_out
    io.sigIO.lft_tile_imm_itype_sext <> d.io.sigIO.lft_tile_imm_itype_sext
+   io.sigIO.lft_tile_imm_sbtype_sext <> d.io.sigIO.lft_tile_imm_sbtype_sext
    io.sigIO.lft_tile_regfile_io_rs1_addr <> d.io.sigIO.lft_tile_regfile_io_rs1_addr
    io.sigIO.lft_tile_regfile_io_rs2_addr <> d.io.sigIO.lft_tile_regfile_io_rs2_addr
    io.sigIO.lft_tile_regfile_io_rs1_data <> d.io.sigIO.lft_tile_regfile_io_rs1_data
    io.sigIO.lft_tile_regfile_io_rs2_data <> d.io.sigIO.lft_tile_regfile_io_rs2_data
    io.sigIO.lft_tile_wb_reg_wbdata <> d.io.sigIO.lft_tile_wb_reg_wbdata
    io.sigIO.lft_tile_wb_reg_wbaddr <> d.io.sigIO.lft_tile_wb_reg_wbaddr
+
+   io.sigIO.lft_tile_dec_wbaddr <> d.io.sigIO.lft_tile_dec_wbaddr
+   io.sigIO.lft_tile_exe_reg_wbaddr <> d.io.sigIO.lft_tile_exe_reg_wbaddr
+   io.sigIO.lft_tile_mem_reg_wbaddr <> d.io.sigIO.lft_tile_mem_reg_wbaddr
 
    io.sigIO.lft_tile_dec_reg_inst <> d.io.sigIO.lft_tile_dec_reg_inst
    io.sigIO.lft_tile_exe_reg_inst <> d.io.sigIO.lft_tile_exe_reg_inst
@@ -88,6 +100,7 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    io.sigIO.lft_tile_exe_reg_pc <> d.io.sigIO.lft_tile_exe_reg_pc
    io.sigIO.lft_tile_mem_reg_pc <> d.io.sigIO.lft_tile_mem_reg_pc
 
+   io.sigIO.lft_tile_alu_fun <> c.io.sigIO.lft_tile_alu_fun
    io.sigIO.lft_tile_lb_table <> d.io.sigIO.lft_tile_lb_table
 
    dontTouch(io.sigIO.lft_tile_regfile)
@@ -108,6 +121,12 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    dontTouch(io.sigIO.lft_tile_exe_reg_pc)
    dontTouch(io.sigIO.lft_tile_mem_reg_pc)
    dontTouch(io.sigIO.lft_tile_lb_table)
+
+   dontTouch(io.sigIO.lft_tile_dec_wbaddr)
+   dontTouch(io.sigIO.lft_tile_exe_reg_wbaddr)
+   dontTouch(io.sigIO.lft_tile_mem_reg_wbaddr)
+   dontTouch(io.sigIO.lft_tile_imm_sbtype_sext)
+   dontTouch(io.sigIO.lft_tile_alu_fun)
 
    val mem_ports = List(io.dmem, io.imem)
    val interrupt = io.interrupt

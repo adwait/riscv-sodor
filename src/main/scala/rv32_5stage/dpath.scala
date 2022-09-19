@@ -41,12 +41,17 @@ class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
    val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
    val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
    val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
+   val lft_tile_imm_sbtype_sext = Output(UInt(conf.xprlen.W))
    val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
+   
+   val lft_tile_dec_wbaddr = Output(UInt(5.W))
+   val lft_tile_exe_reg_wbaddr = Output(UInt(5.W))
+   val lft_tile_mem_reg_wbaddr = Output(UInt(5.W))
+   val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
 
    val lft_tile_dec_reg_inst = Output(UInt(32.W))
    val lft_tile_exe_reg_inst = Output(UInt(32.W))
    val lft_tile_mem_reg_inst = Output(UInt(32.W))
-   val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
 
    val lft_tile_if_reg_pc = Output(UInt(32.W))
    val lft_tile_dec_reg_pc = Output(UInt(32.W))
@@ -563,13 +568,18 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
 
    io.sigIO.lft_tile_exe_alu_out := exe_alu_out
    io.sigIO.lft_tile_imm_itype_sext := imm_itype_sext
+   io.sigIO.lft_tile_imm_sbtype_sext := imm_sbtype_sext
    io.sigIO.lft_tile_regfile_io_rs1_addr := dec_rs1_addr
    io.sigIO.lft_tile_regfile_io_rs2_addr := dec_rs2_addr
    io.sigIO.lft_tile_regfile_io_rs1_data := regfile.io.rs1_data
    io.sigIO.lft_tile_regfile_io_rs2_data := regfile.io.rs2_data
    io.sigIO.lft_tile_wb_reg_wbdata := wb_reg_wbdata
    io.sigIO.lft_tile_wb_reg_wbaddr := wb_reg_wbaddr
-   
+
+   io.sigIO.lft_tile_dec_wbaddr := dec_wbaddr
+   io.sigIO.lft_tile_exe_reg_wbaddr := exe_reg_wbaddr
+   io.sigIO.lft_tile_mem_reg_wbaddr := mem_reg_wbaddr
+
    io.sigIO.lft_tile_dec_reg_inst := dec_reg_inst
    io.sigIO.lft_tile_exe_reg_inst := exe_reg_inst
    io.sigIO.lft_tile_mem_reg_inst := mem_reg_inst
