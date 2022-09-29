@@ -37,6 +37,8 @@ class CoreAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
    val lft_tile_mem_reg_pc = Output(UInt(32.W))
 
    val lft_tile_alu_fun = Output(UInt(4.W))
+   val lft_tile_mem_fcn = Output(UInt(1.W))
+   val lft_tile_mem_typ = Output(UInt(3.W))
 
    val lft_tile_lb_table = Output(new LBEntry())
 }
@@ -101,6 +103,8 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    io.sigIO.lft_tile_mem_reg_pc <> d.io.sigIO.lft_tile_mem_reg_pc
 
    io.sigIO.lft_tile_alu_fun <> c.io.sigIO.lft_tile_alu_fun
+   io.sigIO.lft_tile_mem_fcn <> c.io.sigIO.lft_tile_mem_fcn
+   io.sigIO.lft_tile_mem_typ <> c.io.sigIO.lft_tile_mem_typ
    io.sigIO.lft_tile_lb_table <> d.io.sigIO.lft_tile_lb_table
 
    dontTouch(io.sigIO.lft_tile_regfile)
@@ -127,6 +131,8 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    dontTouch(io.sigIO.lft_tile_mem_reg_wbaddr)
    dontTouch(io.sigIO.lft_tile_imm_sbtype_sext)
    dontTouch(io.sigIO.lft_tile_alu_fun)
+   dontTouch(io.sigIO.lft_tile_mem_fcn)
+   dontTouch(io.sigIO.lft_tile_mem_typ)
 
    val mem_ports = List(io.dmem, io.imem)
    val interrupt = io.interrupt

@@ -21,6 +21,8 @@ import sodor.common.Instructions._
 
 class CtlAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
    val lft_tile_alu_fun = Output(UInt(4.W))
+   val lft_tile_mem_fcn = Output(UInt(1.W))
+   val lft_tile_mem_typ = Output(UInt(3.W))
 }
 
 class CtlToDatIo extends Bundle()
@@ -289,5 +291,7 @@ class CtlPath(implicit val conf: SodorCoreParams) extends Module
    io.ctl.mem_fcn    := cs_mem_fcn
    io.ctl.mem_typ    := cs_msk_sel
 
-   io.sigIO.lft_tile_alu_fun  := cs_alu_fun
+   io.sigIO.lft_tile_alu_fun := cs_alu_fun
+   io.sigIO.lft_tile_mem_fcn := cs_mem_fcn
+   io.sigIO.lft_tile_mem_typ := cs_msk_sel
 }
