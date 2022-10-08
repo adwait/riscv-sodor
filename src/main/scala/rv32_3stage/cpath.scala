@@ -17,6 +17,12 @@ import sodor.common.Instructions._
 import Constants._
 import ALU._
 
+class CtlAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+   val lft_tile_alu_fun = Output(UInt(4.W))
+   val lft_tile_mem_fcn = Output(UInt(1.W))
+   val lft_tile_mem_typ = Output(UInt(3.W))
+}
+
 class CtrlSignals extends Bundle()
 {
    val exe_kill  = Output(Bool())    // squash EX stage (exception/mret occurred)
@@ -46,6 +52,8 @@ class CpathIo(implicit val conf: SodorCoreParams) extends Bundle()
    val dat  = Flipped(new DatToCtlIo())
    val ctl  = new CtrlSignals()
    override def clone = { new CpathIo().asInstanceOf[this.type] }
+
+   val sigIO = new CtlAbstractSignalIO
 }
 
 
@@ -204,4 +212,8 @@ class CtlPath(implicit val conf: SodorCoreParams) extends Module
                               Mux(wb_reg_mem_fcn === M_XWR, Causes.misaligned_store.U,
                                                             Causes.misaligned_load.U
                               )))
+
+   io.sigIO.lft_tile_alu_fun := cs_alu_fun
+   io.sigIO.lft_tile_mem_fcn := cs_mem_fcn
+   io.sigIO.lft_tile_mem_typ := cs_msk_sel
 }

@@ -24,6 +24,27 @@ import freechips.rocketchip.tile.CoreInterrupts
 import Constants._
 import sodor.common._
 
+class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+   val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+   
+   val lft_tile_regfile_io_rs1_addr = Output(UInt(5.W))
+   val lft_tile_regfile_io_rs2_addr = Output(UInt(5.W))
+   val lft_tile_regfile_io_rs1_data = Output(UInt(conf.xprlen.W))
+   val lft_tile_regfile_io_rs2_data = Output(UInt(conf.xprlen.W))
+   
+   val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
+   val lft_tile_imm_sbtype_sext = Output(UInt(conf.xprlen.W))
+   val lft_tile_imm_stype_sext = Output(UInt(conf.xprlen.W))
+   
+   val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
+   val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
+   val lft_tile_exe_reg_wbaddr = Output(UInt(5.W))
+   val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
+
+   val lft_tile_wb_reg_inst = Output(UInt(32.W))
+   val lft_tile_wb_reg_pc = Output(UInt(32.W))
+}
+
 class DatToCtlIo(implicit val conf: SodorCoreParams) extends Bundle()
 {
    val br_eq  = Output(Bool())
@@ -45,6 +66,8 @@ class DpathIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bun
    val dat  = new DatToCtlIo()
    val interrupt = Input(new CoreInterrupts())
    val hartid = Input(UInt())
+
+   val sigIO = new DatAbstractSignalIO
 }
 
 class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Module
@@ -303,6 +326,25 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
                   (wb_reg_ctrl.wb_sel === WB_PC4) -> exe_pc,
                   (wb_reg_ctrl.wb_sel === WB_CSR) -> wb_csr_out
                   ))
+
+   // Expose all signals to the top level so that they can be verified/probed
+   io.sigIO.lft_tile_regfile := Cat(regfile(31) , regfile(30) , regfile(29) , regfile(28) , regfile(27) , regfile(26) , regfile(25) , regfile(24) , regfile(23) , regfile(22) , regfile(21) , regfile(20) , regfile(19) , regfile(18) , regfile(17) , regfile(16) , regfile(15) , regfile(14) , regfile(13) , regfile(12) , regfile(11) , regfile(10) , regfile(9) , regfile(8) , regfile(7) , regfile(6) , regfile(5) , regfile(4) , regfile(3) , regfile(2) , regfile(1) , regfile(0))
+
+   io.sigIO.lft_tile_imm_itype_sext := imm_i_sext
+   io.sigIO.lft_tile_imm_sbtype_sext := imm_b_sext
+   io.sigIO.lft_tile_imm_stype_sext := imm_s_sext
+   io.sigIO.lft_tile_regfile_io_rs1_addr := exe_rs1_addr
+   io.sigIO.lft_tile_regfile_io_rs2_addr := exe_rs2_addr
+   io.sigIO.lft_tile_regfile_io_rs1_data := rf_rs1_data
+   io.sigIO.lft_tile_regfile_io_rs2_data := rf_rs2_data
+   
+   io.sigIO.lft_tile_exe_alu_out := exe_alu_out
+   io.sigIO.lft_tile_wb_reg_wbdata := wb_wbdata
+   io.sigIO.lft_tile_exe_reg_wbaddr := exe_wbaddr
+   io.sigIO.lft_tile_wb_reg_wbaddr := wb_reg_wbaddr
+
+   io.sigIO.lft_tile_wb_reg_inst := wb_reg_inst
+   io.sigIO.lft_tile_wb_reg_pc := wb_reg_pc
 
    //**********************************
    // Printout

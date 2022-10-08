@@ -19,6 +19,11 @@ import sodor.common._
 import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.tile.CoreInterrupts
 
+class CoreAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+  val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+  val lft_tile_pc = Output(UInt(32.W)) 
+}
+
 class CoreIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bundle
 {
   val ddpath = Flipped(new DebugDPath())
@@ -27,6 +32,8 @@ class CoreIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bund
   val interrupt = Input(new CoreInterrupts())
   val hartid = Input(UInt())
   val reset_vector = Input(UInt())
+
+  val sigIO = new CoreAbstractSignalIO
 }
 
 class Core(implicit val p: Parameters, val conf: SodorCoreParams) extends AbstractCore
@@ -55,4 +62,10 @@ class Core(implicit val p: Parameters, val conf: SodorCoreParams) extends Abstra
   val interrupt = io.interrupt
   val hartid = io.hartid
   val reset_vector = io.reset_vector
+
+  io.sigIO.lft_tile_regfile <> d.io.sigIO.lft_tile_regfile
+  io.sigIO.lft_tile_pc <> d.io.sigIO.lft_tile_pc
+
+  dontTouch(io.sigIO.lft_tile_regfile)
+  dontTouch(io.sigIO.lft_tile_pc)
 }

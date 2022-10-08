@@ -17,6 +17,37 @@ import freechips.rocketchip.tile.CoreInterrupts
 import Constants._
 import sodor.common._
 
+class DatAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
+   val lft_tile_regfile = Output(UInt((32*conf.xprlen).W))
+   
+  //  val lft_tile_regfile_io_rs1_addr = Output(UInt(5.W))
+  //  val lft_tile_regfile_io_rs2_addr = Output(UInt(5.W))
+  //  val lft_tile_regfile_io_rs1_data = Output(UInt(conf.xprlen.W))
+  //  val lft_tile_regfile_io_rs2_data = Output(UInt(conf.xprlen.W))
+   
+  //  val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
+  //  val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
+  //  val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
+  //  val lft_tile_imm_sbtype_sext = Output(UInt(conf.xprlen.W))
+  //  val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
+   
+  //  val lft_tile_dec_wbaddr = Output(UInt(5.W))
+  //  val lft_tile_exe_reg_wbaddr = Output(UInt(5.W))
+  //  val lft_tile_mem_reg_wbaddr = Output(UInt(5.W))
+  //  val lft_tile_mem_reg_alu_out = Output(UInt(32.W))
+
+  //  val lft_tile_dec_reg_inst = Output(UInt(32.W))
+  //  val lft_tile_exe_reg_inst = Output(UInt(32.W))
+  //  val lft_tile_mem_reg_inst = Output(UInt(32.W))
+
+   val lft_tile_pc = Output(UInt(32.W))
+  //  val lft_tile_dec_reg_pc = Output(UInt(32.W))
+  //  val lft_tile_exe_reg_pc = Output(UInt(32.W))
+  //  val lft_tile_mem_reg_pc = Output(UInt(32.W))
+
+  //  val lft_tile_lb_table = Output(new LBEntry())
+}
+
 class DatToCtlIo extends Bundle()
 {
    val inst     = Output(UInt(32.W))
@@ -36,6 +67,8 @@ class DpathIo(implicit val p: Parameters, val conf: SodorCoreParams) extends Bun
    val interrupt = Input(new CoreInterrupts())
    val hartid = Input(UInt())
    val reset_vector = Input(UInt())
+
+   val sigIO = new DatAbstractSignalIO
 }
 
 
@@ -264,5 +297,10 @@ class DatPath(implicit val p: Parameters, val conf: SodorCoreParams) extends Mod
       Mux(io.ctl.en_mem, Str("M"), Str(" ")),
       Mux(io.ctl.exception, Str("X"), Str(" ")),
       ir)
+
+
+  // Add lifted signals
+  io.sigIO.lft_tile_regfile := Cat(regfile(31) , regfile(30) , regfile(29) , regfile(28) , regfile(27) , regfile(26) , regfile(25) , regfile(24) , regfile(23) , regfile(22) , regfile(21) , regfile(20) , regfile(19) , regfile(18) , regfile(17) , regfile(16) , regfile(15) , regfile(14) , regfile(13) , regfile(12) , regfile(11) , regfile(10) , regfile(9) , regfile(8) , regfile(7) , regfile(6) , regfile(5) , regfile(4) , regfile(3) , regfile(2) , regfile(1) , regfile(0))
+   io.sigIO.lft_tile_pc := regfile(32)
 
 }
