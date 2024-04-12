@@ -19,6 +19,8 @@ class CoreAbstractSignalIO(implicit val conf: SodorCoreParams) extends Bundle {
    val lft_tile_regfile_io_rs2_data = Output(UInt(conf.xprlen.W))
    val lft_tile_wb_reg_wbdata = Output(UInt(conf.xprlen.W))
    val lft_tile_exe_alu_out = Output(UInt(conf.xprlen.W))
+   val lft_tile_exe_alu_op1 = Output(UInt(conf.xprlen.W))
+   val lft_tile_exe_alu_op2 = Output(UInt(conf.xprlen.W))
    val lft_tile_imm_itype_sext = Output(UInt(conf.xprlen.W))
    val lft_tile_imm_sbtype_sext = Output(UInt(conf.xprlen.W))
    val lft_tile_wb_reg_wbaddr = Output(UInt(5.W))
@@ -80,6 +82,8 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
 
    io.sigIO.lft_tile_regfile <> d.io.sigIO.lft_tile_regfile
    io.sigIO.lft_tile_exe_alu_out <> d.io.sigIO.lft_tile_exe_alu_out
+   io.sigIO.lft_tile_exe_alu_op1 <> d.io.sigIO.lft_tile_exe_alu_op1
+   io.sigIO.lft_tile_exe_alu_op2 <> d.io.sigIO.lft_tile_exe_alu_op2
    io.sigIO.lft_tile_imm_itype_sext <> d.io.sigIO.lft_tile_imm_itype_sext
    io.sigIO.lft_tile_imm_sbtype_sext <> d.io.sigIO.lft_tile_imm_sbtype_sext
    io.sigIO.lft_tile_regfile_io_rs1_addr <> d.io.sigIO.lft_tile_regfile_io_rs1_addr
@@ -102,13 +106,15 @@ class Core()(implicit val p: Parameters, val conf: SodorCoreParams) extends Abst
    io.sigIO.lft_tile_exe_reg_pc <> d.io.sigIO.lft_tile_exe_reg_pc
    io.sigIO.lft_tile_mem_reg_pc <> d.io.sigIO.lft_tile_mem_reg_pc
 
-   io.sigIO.lft_tile_alu_fun <> c.io.sigIO.lft_tile_alu_fun
+   io.sigIO.lft_tile_alu_fun <> d.io.sigIO.lft_tile_alu_fun // c.io.sigIO.lft_tile_alu_fun
    io.sigIO.lft_tile_mem_fcn <> c.io.sigIO.lft_tile_mem_fcn
    io.sigIO.lft_tile_mem_typ <> c.io.sigIO.lft_tile_mem_typ
    io.sigIO.lft_tile_lb_table <> d.io.sigIO.lft_tile_lb_table
 
    dontTouch(io.sigIO.lft_tile_regfile)
    dontTouch(io.sigIO.lft_tile_exe_alu_out)
+   dontTouch(io.sigIO.lft_tile_exe_alu_op1)
+   dontTouch(io.sigIO.lft_tile_exe_alu_op2)
    dontTouch(io.sigIO.lft_tile_imm_itype_sext)
    dontTouch(io.sigIO.lft_tile_regfile_io_rs1_addr)
    dontTouch(io.sigIO.lft_tile_regfile_io_rs2_addr)

@@ -10,3 +10,6 @@ prefix.mk
 */target
 *.log
 target
+
+.metals/*
+.vscode/*
